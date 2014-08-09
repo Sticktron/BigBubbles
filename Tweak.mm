@@ -49,7 +49,7 @@
 #define iOS_7			(kCFCoreFoundationVersionNumber >= 847.20)
 #define iPad			(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 #define WIDTH_IPHONE	280.0f
-#define WIDTH_IPAD		480.0f
+#define WIDTH_IPAD		320.0f
 #define MAX_WIDTH		iPad ? WIDTH_IPAD : WIDTH_IPHONE
 
 
