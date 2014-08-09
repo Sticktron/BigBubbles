@@ -46,9 +46,12 @@
 
 
 
-#define WIDTH_IPHONE	480.0f
-#define WIDTH_IPAD		280.0f
-#define MAX_WIDTH		(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? WIDTH_IPHONE : WIDTH_IPAD
+#define iOS_7			(kCFCoreFoundationVersionNumber >= 847.20)
+#define iPad			(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define WIDTH_IPHONE	280.0f
+#define WIDTH_IPAD		480.0f
+#define MAX_WIDTH		iPad ? WIDTH_IPAD : WIDTH_IPHONE
+
 
 
 static inline CGSize bigSizeFromSize(CGSize size) {
@@ -65,7 +68,7 @@ static inline CGSize bigSizeFromSize(CGSize size) {
 
 
 
-%group main
+%group iOS7
 
 %hook CKUIBehavior
 
@@ -81,7 +84,53 @@ static inline CGSize bigSizeFromSize(CGSize size) {
 
 %end
 
-%end //main
+%end //iOS7
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%group iOS6
+
+%hook CKUIBehavior
+
+- (struct CGSize)videoPreviewBalloonImageMaxSize {
+	CGSize size = %orig;
+	DebugLog(@"original value=%@", NSStringFromCGSize(size));
+	
+	CGSize newSize = bigSizeFromSize(size);
+	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
+	
+	return newSize;
+}
+
+- (struct CGSize)previewBalloonImageMaxSize {
+	CGSize size = %orig;
+	DebugLog(@"original value=%@", NSStringFromCGSize(size));
+	
+	CGSize newSize = bigSizeFromSize(size);
+	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
+	
+	return newSize;
+}
+
+//- (struct CGSize)previewThumbnailMaxSize {
+//	CGSize size = %orig;
+//	DebugLog(@"original value=%@", NSStringFromCGSize(size));
+//	
+//	CGSize newSize = bigSizeFromSize(size);
+//	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
+//	
+//	return newSize;
+//}
+
+//- (struct CGSize)balloonImageSize { %log; struct CGSize r = %orig; return r; }
+
+%end
+
+%end //iOS6
 
 
 
@@ -92,7 +141,11 @@ static inline CGSize bigSizeFromSize(CGSize size) {
 %ctor {
     @autoreleasepool {
         NSLog(@" BigBubbles loaded");
-        %init(main);
+		if (iOS_7) {
+			%init(iOS7);
+		} else {
+			%init(iOS6);
+		}
 	}
 }
 

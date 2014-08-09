@@ -1,5 +1,5 @@
 ARCHS = armv7 armv7s arm64
-TARGET = iphone:clang:latest:7.0
+TARGET = iphone:clang:latest:6.0
 
 THEOS_BUILD_DIR = Packages
 
