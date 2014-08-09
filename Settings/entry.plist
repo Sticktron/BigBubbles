@@ -1,0 +1,10 @@
+{
+	entry = {
+		bundle = BigBubblesSettings;
+		cell = PSLinkCell;
+		detail = "BigBubblesSettingsController";
+		icon = "Icon.png";
+		isController = 1;
+		label = BigBubbles;
+	};
+}

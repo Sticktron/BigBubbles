@@ -1,0 +1,405 @@
+//
+//  Big Bubbles
+//	Bigger chat bubbles for image previews in the Messages App.
+//  Copied from iOS 8.
+//
+//  Created by Sticktron.
+//  Copyright (c) 2014. All rights reserved.
+//
+//
+//  Hierarchy (base class > subclass > subclass > etc.):
+//    UIImageView > CKBalloonImageView > CKBalloonView > CKImageBalloonView
+//    UICollectionViewCell > CKEditableCollectionViewCell > CKTranscriptCell > CKTranscriptMessageCell > CKTranscriptBalloonCell
+//
+//
+
+//deviceconsole | grep 'BigBubbles' | awk '{gsub(/@@@/,"\n")}1
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+#import <ChatKit/CKBalloonImageView.h>
+#import <ChatKit/CKBalloonView.h>
+#import <ChatKit/CKConversation.h>
+#import <ChatKit/CKImageBalloonView.h>
+#import <ChatKit/CKImageData.h>
+#import <ChatKit/CKImageMediaObject.h>
+#import <ChatKit/CKMediaObject.h>
+#import <ChatKit/CKMediaObjectManager.h>
+#import <ChatKit/CKMessagePart.h>
+#import <ChatKit/CKPreviewDispatchCache.h>
+#import <ChatKit/CKTranscriptBalloonCell.h>
+#import <ChatKit/CKTranscriptController.h>
+#import <ChatKit/CKTranscriptDataRow.h>
+#import <ChatKit/CKTranscriptDataRowSize.h>
+#import <ChatKit/CKUIBehavior.h>
+
+////////////////////////////////////////////////////////////////////////////////
+#ifdef DEBUG
+	#define DebugLog(s, ...) \
+			NSLog(@"BigBubbles >> %@::%@ >> %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), [NSString stringWithFormat:(s), ##__VA_ARGS__])
+	#define DebugLogC(s, ...) \
+			NSLog(@"BigBubbles >> %@", [NSString stringWithFormat:(s), ##__VA_ARGS__])
+#else
+	#define DebugLog(s, ...)
+	#define DebugLogC(s, ...)
+#endif
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+#define MAX_WIDTH       280.0f
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+/*
+ * Factory resize method for UIImage Class.
+ */
+@interface UIImage (Private)
++ (UIImage *)reSizeImage:(UIImage *)image toSize:(CGSize)reSize;
+@end
+
+@implementation UIImage (Private)
++ (UIImage *)reSizeImage:(UIImage *)image toSize:(CGSize)reSize {
+	UIGraphicsBeginImageContext(CGSizeMake(reSize.width, reSize.height));
+	[image drawInRect:CGRectMake(0, 0, reSize.width, reSize.height)];
+	UIImage *reSizeImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	return reSizeImage;
+}
+@end
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+/*
+ * Helpers
+ */
+static inline CGSize resizeToMax(CGSize size) {
+    CGSize result;
+    result.width = MAX_WIDTH;
+    result.height = (MAX_WIDTH / size.width) * size.height;
+    DebugLogC(@"resizing from:%@ to %@", NSStringFromCGSize(size), NSStringFromCGSize(result));
+    return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%group main
+
+
+%hook CKTranscriptDataRow
+/*
+ * Make cell bigger.
+ */
+- (id)rowSize {
+	CKTranscriptDataRowSize *result = %orig;
+	
+	if ([self.cellIdentifier isEqualToString:@"CKImageBalloonView"] ||
+        [self.cellIdentifier isEqualToString:@"CKImageBalloonView-left"]) {
+        
+        DebugLog(@"size for image cell: %@", NSStringFromCGSize(result.size));
+        
+//        float scaleFactor = MAX_WIDTH / size.width;
+//        size.width = MAX_WIDTH;
+//        size.height = size.height * scaleFactor;
+//        
+//        DebugLog(@"changed cell size to: %@", NSStringFromCGSize(result.size));
+	}
+	return result;
+}
+%end
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+%hook CKImageMediaObject
+- (id)previewForOrientation:(BOOL)arg1 {
+    DebugLog(@"creating preview for orientation:%d", arg1);
+    
+    UIImage *result = %orig;
+    DebugLog(@"original preview image size:%@", NSStringFromCGSize(result.size));
+    
+//    // get full image from original data
+//    UIImage *fullImage = [UIImage imageWithData:self.data];
+//    DebugLog(@"full image size:%@", NSStringFromCGSize(fullImage.size));
+//    
+//    // resize
+//    result = [UIImage reSizeImage:fullImage toSize:resizeToMax(fullImage.size)];
+//    DebugLog(@"new preview image size:%@", NSStringFromCGSize(result.size));
+	
+    return result;
+}
+- (id)generateThumbnail {
+	id thumbnail = %orig;
+	DebugLog(@"generated thumbnail, size=%@", NSStringFromCGSize([thumbnail size]));
+	return thumbnail;
+}
+- (id)generateThumbnailFillToSize:(CGSize)arg1 {
+	DebugLog(@"size:%@", NSStringFromCGSize(arg1));
+	id thumbnail = %orig;
+	DebugLog(@"returning > %@", thumbnail);
+	return thumbnail;
+}
+%end
+*/
+
+/*
+%hook CKImageBalloonView
+- (id)initWithFrame:(CGRect)frame {
+    %log;
+    
+//    CGRect rect = (CGRect){frame.origin, resizeToMax(frame.size)};
+//    CKBalloonImageView *view = %orig(rect);
+	
+	self = %orig;
+	if (self) {
+        self.contentMode = UIViewContentModeCenter;
+        self.backgroundColor = [UIColor colorWithRed:0 green:1 blue:0 alpha:1];
+    }
+    return self;
+}
+%end
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%hook CKImageMediaObject
+/*
+//+ (Class)imageDataClass { %log; Class r = %orig; NSLog(@" = %@", NSStringFromClass(r)); return r; }
+//+ (_Bool)isPreviewable { %log; _Bool r = %orig; NSLog(@" = %d", r); return r; }
+//+ (id)fallbackFilenamePrefix { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//+ (id)UTITypes { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (CKImageData *)imageData { %log; CKImageData * r = %orig; NSLog(@" = %@", r); return r; }
+- (id)generateThumbnail {
+	id r = %orig;
+	DebugLog(@"size=%@", NSStringFromCGSize([r size]));
+	return r;
+}
+- (id)generateThumbnailFillToSize:(CGSize)size {
+	id r = %orig;
+	DebugLog(@"size=%@", NSStringFromCGSize([r size]));
+	return r;
+}
+- (struct CGSize)bbSize { %log; struct CGSize r = %orig; return r; }
+- (int)mediaType { %log; int r = %orig; NSLog(@" = %d", r); return r; }
+*/
+%end
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%hook CKUIBehavior
+
+- (CGSize)thumbnailFillSizeForImageSize:(CGSize)size {
+	CGSize fillSize = %orig;
+	DebugLog(@"original value=%@", NSStringFromCGSize(fillSize));
+	
+	CGSize newSize = resizeToMax(fillSize);
+	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
+	
+	return newSize;
+}
+
+/*
+- (struct CGSize)untailedPreviewFillSizeForImageSize:(struct CGSize)size {
+	CGSize previewFillSize = %orig;
+	DebugLog(@"original value=%@", NSStringFromCGSize(previewFillSize));
+	return previewFillSize;
+}
+- (struct UIEdgeInsets)balloonMaskFrameInsets {
+    %log;
+    struct UIEdgeInsets r = %orig; NSLog(@" = %@", NSStringFromUIEdgeInsets(r)); return r;
+}
+- (struct UIEdgeInsets)balloonMaskFrameCapInsets {
+    %log;
+    struct UIEdgeInsets r = %orig; NSLog(@" = %@", NSStringFromUIEdgeInsets(r)); return r;
+}
+- (struct UIEdgeInsets)balloonMaskAlignmentRectInsets {
+    %log;
+    struct UIEdgeInsets r = %orig; NSLog(@" = %@", NSStringFromUIEdgeInsets(r)); return r;
+}
+- (struct UIEdgeInsets)balloonMaskCapInsets {
+    %log;
+    struct UIEdgeInsets r = %orig; NSLog(@" = %@", NSStringFromUIEdgeInsets(r)); return r;
+}
+- (double)balloonMaskTailWidth { %log; double r = %orig; NSLog(@" = %f", r); return r; }
+- (struct CGSize)attachmentBalloonSize { %log; struct CGSize r = %orig; return r; }
+- (CGSize)balloonMaskSize {
+	CGSize r = %orig;
+	DebugLog(@"size=%@", NSStringFromCGSize(r));
+	return r;
+}
+*/
+
+%end
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+%hook CKImageData
+- (id)initWithData:(id)arg1 {
+	self = %orig;
+	if (self) {
+		DebugLog(@"self=%@", self);
+		DebugLog(@"image=%@", self.image);
+	}
+	return self;
+}
+- (CGSize)pxSize {
+	return CGSizeMake(3,3);
+}
+- (CGSize)ptSize {
+	return CGSizeMake(3,3);
+}
+- (id)thumbnailFillToSize:(struct CGSize)arg1 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+- (id)_thumbnailFillToSize:(struct CGSize)arg1 atIndex:(unsigned long long)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+- (id)thumbnailFitToSize:(struct CGSize)arg1 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+- (id)_thumbnailFitToSize:(struct CGSize)arg1 atIndex:(unsigned long long)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+- (id)thumbnailsFillToSize:(struct CGSize)arg1 maxCount:(unsigned long long)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+- (id)thumbnailsFitToSize:(struct CGSize)arg1 maxCount:(unsigned long long)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+- (UIImage *)image {
+	UIImage *r = %orig;
+	DebugLog(@"size=%@", NSStringFromCGSize(r.size));
+	return r;
+}
+
+%end
+*/
+
+
+//%hook CKMediaObjectManager
+/*
+//+ (id)sharedInstance { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (void)setDynTypes:(NSDictionary *)dynTypes { %log; %orig; }
+//- (NSDictionary *)dynTypes { %log; NSDictionary * r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (void)setUTITypes:(NSDictionary *)UTITypes { %log; %orig; }
+//- (NSDictionary *)UTITypes { %log; NSDictionary * r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (void)setClasses:(NSArray *)classes { %log; %orig; }
+//- (NSArray *)classes { %log; NSArray * r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (void)setTransfers:(NSMutableDictionary *)transfers { %log; %orig; }
+//- (NSMutableDictionary *)transfers { %log; NSMutableDictionary * r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (void)transferRemoved:(id)arg1 { %log; %orig; }
+//- (Class)transferClass { %log; Class r = %orig; NSLog(@" = %@", NSStringFromClass(r)); return r; }
+
+//- (id)imageDataWithData:(id)arg1 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (id)fileManager { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (id)transferWithFileURL:(id)arg1 transcoderUserInfo:(id)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)transferWithTransferGUID:(id)arg1 message:(id)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (id)mediaObjectWithPasteboard:(id)arg1 itemAtIndex:(unsigned long long)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)mediaObjectWithFileURL:(id)arg1 filename:(id)arg2 transcoderUserInfo:(id)arg3 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)mediaObjectWithData:(id)arg1 UTIType:(id)arg2 filename:(id)arg3 transcoderUserInfo:(id)arg4 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)mediaObjectWithTransferGUID:(id)arg1 message:(id)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (Class)classForFilename:(id)arg1 { %log; Class r = %orig; NSLog(@" = %@", NSStringFromClass(r)); return r; }
+//- (Class)classForUTIType:(id)arg1 { %log; Class r = %orig; NSLog(@" = %@", NSStringFromClass(r)); return r; }
+
+//- (id)UTITypeForFilename:(id)arg1 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)UTITypeForExtension:(id)arg1 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+
+//- (id)init { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+*/
+//%end
+
+
+/*
+%hook CKPreviewDispatchCache
+//- (void)setPendingBlocks:(CKMultiDict *)pendingBlocks { %log; %orig; }
+//- (CKMultiDict *)pendingBlocks { %log; CKMultiDict * r = %orig; NSLog(@" = %@", r); return r; }
+//- (void)setDispatchCache:(CKDispatchCache *)dispatchCache { %log; %orig; }
+//- (CKDispatchCache *)dispatchCache { %log; CKDispatchCache * r = %orig; NSLog(@" = %@", r); return r; }
+//- (void)transferRemoved:(id)arg1 { %log; %orig; }
+//- (void)transferFinished:(id)arg1 { %log; %orig; }
+//- (void)didReceiveMemoryWarning { %log; %orig; }
+//- (void)flush { %log; %orig; }
+//- (void)systemApplicationDidSuspendForEventsOnly { %log; %orig; }
+//- (void)systemApplicationDidSuspend { %log; %orig; }
+//- (id)notificationCenter { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (id)mediaObjectManager { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+//- (void)resume { %log; %orig; }
+//- (void)endGeneratingForMediaObject:(id)arg1 orientation:(BOOL)arg2 { %log; %orig; }
+//- (void)beginGeneratingForMediaObject:(id)arg1 orientation:(BOOL)arg2 { %log; %orig; }
+//- (_Bool)isGeneratingForMediaObject:(id)arg1 orientation:(BOOL)arg2 { %log; _Bool r = %orig; NSLog(@" = %d", r); return r; }
+- (void)setCachedPreview:(id)arg1 forMediaObject:(id)arg2 orientation:(BOOL)arg3 { %log; %orig; }
+- (id)cachedPreviewForMediaObject:(id)arg1 orientation:(BOOL)arg2 { %log; id r = %orig; NSLog(@" = %@", r); return r; }
+- (id)init {
+	%log;
+	self = %orig;
+	if (self) {
+//		DebugLog(@"flushing cache...");
+//		[self flush];
+	}
+	return self;
+}
+%end
+*/
+
+
+/*
+%hook CKTranscriptController
+- (CGRect)previewController:(id)arg1 frameForPreviewItem:(id)arg2 inSourceView:(id *)arg3 {
+	DebugLog(@"previewController=%@, frame=%@", arg1, arg2);
+	CGRect result = %orig;
+	DebugLog(@"returning >> %@", NSStringFromCGRect(result));
+	return result;
+}
+%end
+*/
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%end //main
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+%ctor {
+    @autoreleasepool {
+        NSLog(@" BigBubbles loaded");
+        %init(main);
+        %init(test);
+	}
+}
+
