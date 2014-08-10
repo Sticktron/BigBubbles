@@ -47,17 +47,21 @@
 
 
 #define iOS_7			(kCFCoreFoundationVersionNumber >= 847.20)
-#define iPad			(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 #define WIDTH_IPHONE	280.0f
 #define WIDTH_IPAD		320.0f
-#define MAX_WIDTH		iPad ? WIDTH_IPAD : WIDTH_IPHONE
 
 
 
 static inline CGSize bigSizeFromSize(CGSize size) {
     CGSize result;
-    result.width = MAX_WIDTH;
-    result.height = (MAX_WIDTH / size.width) * size.height;
+	
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+		result.width = WIDTH_IPAD;
+	} else {
+		result.width = WIDTH_IPHONE;
+	}
+	
+    result.height = (result.width / size.width) * size.height;
     DebugLogC(@"resizing from:%@ to %@", NSStringFromCGSize(size), NSStringFromCGSize(result));
     return result;
 }
