@@ -1,6 +1,6 @@
 Package: com.sticktron.bigbubbles
 Name: Big Bubbles
-Version: 1.0.4
+Version: 1.0.4+
 Description: Bigger image bubbles for the Messages App.
 Section: Tweaks
 Depends: mobilesubstrate, preferenceloader, firmware (>= 6.0)

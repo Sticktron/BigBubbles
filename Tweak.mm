@@ -1,154 +1,144 @@
 //
 //  Big Bubbles
 //	Bigger chat bubbles for image previews in the Messages App.
-//  Copied from iOS 8.
+//  Inspired by iOS 8.
 //
 //  Created by Sticktron.
 //  Copyright (c) 2014. All rights reserved.
 //
 //
-//  Hierarchy (base class > subclass > subclass > etc.):
-//    UIImageView > CKBalloonImageView > CKBalloonView > CKImageBalloonView
-//    UICollectionViewCell > CKEditableCollectionViewCell > CKTranscriptCell > CKTranscriptMessageCell > CKTranscriptBalloonCell
-//
-//
-
-//deviceconsole | grep 'BigBubbles' | awk '{gsub(/@@@/,"\n")}1
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
-#import <ChatKit/CKBalloonImageView.h>
-#import <ChatKit/CKBalloonView.h>
-#import <ChatKit/CKConversation.h>
-#import <ChatKit/CKImageBalloonView.h>
-#import <ChatKit/CKImageData.h>
-#import <ChatKit/CKImageMediaObject.h>
-#import <ChatKit/CKMediaObject.h>
-#import <ChatKit/CKMediaObjectManager.h>
-#import <ChatKit/CKMessagePart.h>
-#import <ChatKit/CKPreviewDispatchCache.h>
-#import <ChatKit/CKTranscriptBalloonCell.h>
-#import <ChatKit/CKTranscriptController.h>
-#import <ChatKit/CKTranscriptDataRow.h>
-#import <ChatKit/CKTranscriptDataRowSize.h>
 #import <ChatKit/CKUIBehavior.h>
 
-#ifdef DEBUG
-	#define DebugLog(s, ...) \
-			NSLog(@"BigBubbles >> %@::%@ >> %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), [NSString stringWithFormat:(s), ##__VA_ARGS__])
-	#define DebugLogC(s, ...) \
-			NSLog(@"BigBubbles >> %@", [NSString stringWithFormat:(s), ##__VA_ARGS__])
-#else
-	#define DebugLog(s, ...)
-	#define DebugLogC(s, ...)
-#endif
+#define DEBUG_PREFIX @"BigBubbles[debug]"
+#import "DebugLog.h"
+
+
+#define YES_OR_NO				@"YES":@"NO"
+
+#define SETTINGS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.bigbubbles.plist"]
+
+static const float kDefaultWidthPhone = 280;
+static const float kDefaultWidthPad = 420;
+
+
+static BOOL is_iOS7;
+static BOOL is_iPad;
+static BOOL is_Enabled;
+static int bubbleWidth;
 
 
 
-#define iOS_7			(kCFCoreFoundationVersionNumber >= 847.20)
-#define WIDTH_IPHONE	280.0f
-#define WIDTH_IPAD		320.0f
+#pragma mark - Functions -
 
-
-
-static inline CGSize bigSizeFromSize(CGSize size) {
-    CGSize result;
-	
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-		result.width = WIDTH_IPAD;
-	} else {
-		result.width = WIDTH_IPHONE;
-	}
-	
-    result.height = (result.width / size.width) * size.height;
-    DebugLogC(@"resizing from:%@ to %@", NSStringFromCGSize(size), NSStringFromCGSize(result));
-    return result;
+//
+// The Heavy Lifter: Calculates a new size for thumbnails using the correct aspect ratio.
+//
+static inline CGSize bigThumbSizeFromSize(CGSize size) {
+	CGSize bigThumbSize = CGSizeMake(bubbleWidth, 0);
+    bigThumbSize.height = (bigThumbSize.width / size.width) * size.height;
+	DebugLogC(@"original thumb size:%@ || new thumb size:%@", NSStringFromCGSize(size), NSStringFromCGSize(bigThumbSize));
+    return bigThumbSize;
 }
 
 
+//
+// Load settings
+//
+static inline void loadSettings() {
+	NSDictionary *userSettings = [NSDictionary dictionaryWithContentsOfFile:SETTINGS_PLIST_PATH];
+	if (userSettings) {
+		DebugLogC(@"loaded settings: %@", userSettings);
+		
+		if (userSettings[@"Enabled"]) {
+			is_Enabled = [userSettings[@"Enabled"] boolValue];
+			DebugLogC(@"found setting: Enabled = %@", is_Enabled?YES_OR_NO);
+		}
+		
+		if (userSettings[@"BubbleWidth"]) {
+			bubbleWidth = [userSettings[@"BubbleWidth"] integerValue];
+			DebugLogC(@"found setting for BubbleWidth: %d", bubbleWidth);
+		}
+		
+		/*
+		if (userSettings[@"NoTails"]) {
+			noTails = [userSettings[@"NoTails"] boolValue];
+			DebugLogC(@"found setting for NoTails: %@",  noTails?YES_OR_NO);
+		}
+		
+		if (userSettings[@"SquareBubbles"]) {
+			squareBubbles = [userSettings[@"SquareBubbles"] boolValue];
+			DebugLogC(@"found setting for SquareBubbles: %@", squareBubbles?YES_OR_NO);
+		}
+		*/
+		
+	} else {
+		DebugLogC(@"no user settings.");
+	}
+}
 
-////////////////////////////////////////////////////////////////////////////////
+
+/*
+//
+// Handle notifications from Settings
+//
+static inline void settingsChanged(CFNotificationCenterRef center, void *observer, CFStringRef name,
+								   const void *object, CFDictionaryRef userInfo) {
+	NSLog(@"••••• CFNotification received •••••");
+	loadSettings();
+}
+*/
 
 
+
+#pragma mark - Hooks -
 
 %group iOS7
-
 %hook CKUIBehavior
-
-- (CGSize)thumbnailFillSizeForImageSize:(CGSize)size {
-	CGSize fillSize = %orig;
-	DebugLog(@"original value=%@", NSStringFromCGSize(fillSize));
-	
-	CGSize newSize = bigSizeFromSize(fillSize);
-	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
-	
-	return newSize;
+- (CGSize)thumbnailFillSizeForImageSize:(CGSize)imageSize {
+	return bigThumbSizeFromSize(%orig);
 }
-
 %end
-
-%end //iOS7
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-
+%end
 
 
 %group iOS6
-
 %hook CKUIBehavior
-
-- (struct CGSize)videoPreviewBalloonImageMaxSize {
-	CGSize size = %orig;
-	DebugLog(@"original value=%@", NSStringFromCGSize(size));
-	
-	CGSize newSize = bigSizeFromSize(size);
-	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
-	
-	return newSize;
+- (CGSize)videoPreviewBalloonImageMaxSize {
+	return bigThumbSizeFromSize(%orig);
 }
-
-- (struct CGSize)previewBalloonImageMaxSize {
-	CGSize size = %orig;
-	DebugLog(@"original value=%@", NSStringFromCGSize(size));
-	
-	CGSize newSize = bigSizeFromSize(size);
-	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
-	
-	return newSize;
+- (CGSize)previewBalloonImageMaxSize {
+	return bigThumbSizeFromSize(%orig);
 }
-
-//- (struct CGSize)previewThumbnailMaxSize {
-//	CGSize size = %orig;
-//	DebugLog(@"original value=%@", NSStringFromCGSize(size));
-//	
-//	CGSize newSize = bigSizeFromSize(size);
-//	DebugLog(@">> returning: %@", NSStringFromCGSize(newSize));
-//	
-//	return newSize;
-//}
-
-//- (struct CGSize)balloonImageSize { %log; struct CGSize r = %orig; return r; }
-
 %end
-
-%end //iOS6
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-
+%end
 
 
 %ctor {
     @autoreleasepool {
-        NSLog(@" BigBubbles loaded");
-		if (iOS_7) {
-			%init(iOS7);
+		DebugLogC(@"initializing...");
+		
+		// init defaults
+		is_Enabled = YES;
+		is_iOS7 = (kCFCoreFoundationVersionNumber >= 847.20);
+		is_iPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+		bubbleWidth = (is_iPad) ? kDefaultWidthPad : kDefaultWidthPhone;
+		
+		loadSettings();
+		
+		if (!is_Enabled) {
+			NSLog(@" BigBubbles is disabled.");
 		} else {
-			%init(iOS6);
+			NSLog(@" BigBubbles is enabled.");
+			
+			// load hooks
+			if (is_iOS7) {
+				%init(iOS7);
+			} else {
+				%init(iOS6);
+			}
 		}
 	}
 }

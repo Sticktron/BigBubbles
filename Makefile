@@ -20,5 +20,5 @@ after-stage::
 	find $(FW_STAGING_DIR) -iname '*.png' -exec pincrush-osx -i {} \;
 
 after-install::
-	#install.exec "killall -9 MobileSMS; killall -9 Preferences"
-	install.exec "killall -HUP SpringBoard"
+	install.exec "killall -9 MobileSMS; killall -9 Preferences"
+#install.exec "killall -HUP SpringBoard"

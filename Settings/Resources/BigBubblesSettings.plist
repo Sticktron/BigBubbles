@@ -6,68 +6,318 @@
 	<string>BigBubbles</string>
 	<key>items</key>
 	<array>
+		
+		
+		
+		<!-- Stripe Group ----------------------------------------------------->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>headerCellClass</key>
-			<string>LogoCell</string>
+			<string>MGBBStripeCell</string>
+		</dict>
+		
+		
+		
+		
+		
+		<!-- Enabled Switch Group --------------------------------------------->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
 			<key>label</key>
 			<string></string>
 		</dict>
+		
+		<!-- Enabled Switch -->
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Enabled</string>
+			
+			<key>id</key>
+			<string>Enabled</string>
+			<key>set</key>
+			<string>setEnabledSwitch:specifier:</string>
+
+			<key>key</key>
+			<string>Enabled</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.sticktron.bigbubbles</string>
+			
+		</dict>
+		
+		
+		
+		
+		
+		<!-- Appearance Group ------------------------------------------------->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Bubble Style</string>
+			<key>id</key>
+			<string>SizeGroupCell</string>
+			<key>footerCellClass</key>
+			<string>MGBBPreviewCell</string>
+		</dict>
+		
+		<!-- Disable Tails
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>No Tails</string>
+			
+			<key>id</key>
+			<string>NoTails</string>
+			<key>set</key>
+			<string>setNoTailsSwitch:specifier:</string>
+			
+			<key>key</key>
+			<string>NoTails</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.sticktron.bigbubbles</string>
+		</dict>
+		-->
+		
+		<!-- Bubble Shape
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>No Rounded Corners</string>
+			
+			<key>id</key>
+			<string>SquareBubbles</string>
+			<key>set</key>
+			<string>setSquareBubblesSwitch:specifier:</string>
+			
+			<key>key</key>
+			<string>SquareBubbles</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.sticktron.bigbubbles</string>
+		</dict>
+		 -->
+		
+		<!-- Size List -->
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>label</key>
+			<string>Size</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			
+			<key>id</key>
+			<string>BubbleSizeList</string>
+			<key>set</key>
+			<string>setSizeListValue:specifier:</string>
+			
+			<key>validTitles</key>
+			<array>
+				<string>Big (iOS 8 size)</string>
+				<string>Bigger</string>
+				<string>Custom</string>
+			</array>
+			
+			<key>validValues</key>
+			<array>
+				<string>big</string>
+				<string>bigger</string>
+				<string>custom</string>
+			</array>
+			
+			<key>key</key>
+			<string>BubbleSize</string>
+			<key>default</key>
+			<string>bigger</string>
+			
+			<key>defaults</key>
+			<string>com.sticktron.bigbubbles</string>
+		</dict>
+		
+		<!-- Custom Size Slider -->
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>cellClass</key>
+			<string>MGBBSliderCell</string>
+			<key>label</key>
+			<string></string>
+			
+			<key>id</key>
+			<string>BubbleSizeSlider</string>
+			<key>set</key>
+			<string>setSliderValue:specifier:</string>
+			
+			<key>min</key>
+			<real>0</real>
+			<key>max</key>
+			<real>100</real>
+			
+			<key>showValue</key>
+			<false/>
+			
+			<key>leftImage</key>
+			<string>icons/icon-minus.png</string>
+			<key>rightImage</key>
+			<string>icons/icon-plus.png</string>
+			
+			<key>key</key>
+			<string>BubbleWidth</string>
+			<key>default</key>
+			<real>50</real>
+			<key>defaults</key>
+			<string>com.sticktron.bigbubbles</string>
+		</dict>
+		
+		<!-- Apply Changes Button -->
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Apply Changes</string>
+			<key>action</key>
+			<string>applyChanges</string>
+		</dict>
+		
+		
+		
+		
+		
+		<!-- Support Links ------------------------------------------>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Support</string>
+		</dict>
+		
+		<!-- Email -->
+		<dict>
+			<key>action</key>
+			<string>openEmail</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Email</string>
+			<key>icon</key>
+			<string>icons/email.png</string>
+		</dict>
+		
+		<!-- Tweet -->
+		<dict>
+			<key>action</key>
+			<string>openTwitter</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Twitter</string>
+			<key>icon</key>
+			<string>icons/twitter.png</string>
+		</dict>
+		
+		
+		
+		
+		
+		<!-- Other Links ------------------------------------------>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Links</string>
+		</dict>
+		
+		<!-- View Source -->
+		<dict>
+			<key>action</key>
+			<string>openGitHub</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>View Source</string>
+			<key>icon</key>
+			<string>icons/github.png</string>
+		</dict>
+		
+		<!-- r/jailbreak -->
+		<dict>
+			<key>action</key>
+			<string>openReddit</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Visit r/jailbreak</string>
+			<key>icon</key>
+			<string>icons/reddit.png</string>
+		</dict>
+		
+		<!-- sticktron.com -->
+		<dict>
+			<key>action</key>
+			<string>openWebsite</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>sticktron.com</string>
+			<key>icon</key>
+			<string>icons/www.png</string>
+		</dict>
+		
+		<!-- paypal -->
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Donate 🍪</string>
+			<key>icon</key>
+			<string>icons/paypal.png</string>
+			<key>action</key>
+			<string>openPayPal</string>
+		</dict>
+		
+		
+		
+		
+		
+		<!-- Idea Credit ------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Idea by Raymi</string>
 		</dict>
+		
+		
+		
+		
+		
+		<!-- More Credits ------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Made by Sticktron</string>
-		</dict>
-		<dict>
-			<key>action</key>
-			<string>openEmailForSticktron</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Send me an Email</string>
-			<key>icon</key>
-			<string>Email.png</string>
-		</dict>
-		<dict>
-			<key>action</key>
-			<string>openTwitterForSticktron</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Send me a Tweet</string>
-			<key>icon</key>
-			<string>Twitter.png</string>
-		</dict>
-		<dict>
-			<key>action</key>
-			<string>openGitHubForSticktron</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Source Code</string>
-			<key>icon</key>
-			<string>GitHub.png</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>label</key>
-			<string></string>
 			<key>footerText</key>
-			<string>BigBubbles 1.0
-
-©2014 😈
-
-			</string>
+			<string>©2014
+				
+😈</string>
 		</dict>
+		
+		
+		
+		
+		
 	</array>
 </dict>
 </plist>
