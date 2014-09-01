@@ -16,42 +16,47 @@
 #import "../DebugLog.h"
 
 
-
 #define YES_OR_NO				@"YES":@"NO"
 
 #define PINK					[UIColor colorWithRed:1 green:45/255.0 blue:85/255.0 alpha:1]
 #define PURPLE					[UIColor colorWithRed:128/255.0 green:0 blue:1 alpha:1]
 
 #define URL_EMAIL				@"mailto:sticktron@hotmail.com"
-#define URL_TWITTER_APP		@"twitter://user?screen_name=sticktron"
-#define URL_TWITTER_WEB		@"http://twitter.com/sticktron"
+#define URL_TWITTER_APP			@"twitter://user?screen_name=sticktron"
+#define URL_TWITTER_WEB			@"http://twitter.com/sticktron"
 #define URL_GITHUB				@"http://github.com/Sticktron/BigBubbles"
 #define URL_REDDIT				@"http://reddit.com/r/jailbreak"
-#define URL_WEBSITE			@"http://sticktron.com"
+#define URL_WEBSITE				@"http://sticktron.com"
 #define URL_PAYPAL				@"https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BKGYMJNGXM424&lc=CA&item_name=Donation%20to%20Sticktron&item_number=BigBubbles&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"
 
 #define SETTINGS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.bigbubbles.plist"]
 #define SETTINGS_ICON_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/Icon@2x.png"
-#define PHONE_IMAGE_PATH			@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-phone@2x.png"
-#define BUBBLE_IMAGE_PATH			@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-bubble@2x.png"
+#define PHONE_IMAGE_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-phone@2x.png"
+#define BUBBLE_IMAGE_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-bubble@2x.png"
 
-#define SIZE_MIN				32.0
+#define SIZE_MIN				64.0
+
 #define SIZE_BIG_PHONE			232.0
 #define SIZE_BIGGER_PHONE		280.0
 #define SIZE_MAX_PHONE			300.0
+
 #define SIZE_BIG_PAD			312.0
-#define SIZE_BIGGER_PAD		420.0
+#define SIZE_BIGGER_PAD			420.0
 #define SIZE_MAX_PAD			512.0
 
-#define SIZE_PREVIEW_MIN		20.0
-#define SIZE_PREVIEW_MAX		103.0
+#define SIZE_PREVIEW_MIN		26.0
+#define SIZE_PREVIEW_MAX		101.0
 
-#define is_iPad				(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define ORIGIN_PREVIEW_X		116.0
+#define ORIGIN_PREVIEW_Y		209.0
 
 
+#define is_iPad					(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
-#pragma mark - Header Stripe Cell -
 
+//
+// Header Stripe Cell
+//
 @interface MGBBStripeCell : PSTableCell
 @end
 
@@ -81,9 +86,9 @@
 @end
 
 
-
-#pragma mark - Preview Cell -
-
+//
+// Preview Cell
+//
 @interface MGBBPreviewCell : PSTableCell
 @property (nonatomic, strong) UIImageView *previewBubble;
 @end
@@ -116,8 +121,8 @@
 		_previewBubble = [[UIImageView alloc] initWithImage:bubbleImage];
 		
 		frame = _previewBubble.frame;
-		frame.origin.x = 112.0 - frame.size.width;
-		frame.origin.y = 195.0 - frame.size.height;
+		frame.origin.x = ORIGIN_PREVIEW_X - frame.size.width;
+		frame.origin.y = ORIGIN_PREVIEW_Y - frame.size.height;
 		_previewBubble.frame = frame;
 		
 		
@@ -139,16 +144,16 @@
 	frame.size.width = newWidth;
 	frame.size.height = (newWidth / oldWidth) * frame.size.height;
 	
-	frame.origin.x = 112.0 - frame.size.width;
-	frame.origin.y = 195.0 - frame.size.height;
+	frame.origin.x = ORIGIN_PREVIEW_X - frame.size.width;
+	frame.origin.y = ORIGIN_PREVIEW_Y - frame.size.height;
 	self.previewBubble.frame = frame;
 }
 @end
 
 
-
-#pragma mark - Slider Cell -
-
+//
+// Slider Cell
+//
 @interface MGBBSliderCell : PSSliderTableCell
 @end
 
@@ -170,23 +175,15 @@
 	}
 	return self;
 }
-- (void)hide:(BOOL)shouldHide {
-	if (shouldHide) {
-		DebugLog(@"disabling slider");
-		[self.specifier setProperty:@NO forKey:@"enabled"];
-		self.alpha = 0.1;
-	} else {
-		DebugLog(@"enabling slider");
-		[self.specifier setProperty:@YES forKey:@"enabled"];
-		self.alpha = 1.0;
-	}
-}
 @end
 
 
 
-#pragma mark - Settings Controller -
 
+
+//
+// Settings Controller
+//
 @interface BigBubblesSettingsController : PSListController
 @property (nonatomic, strong) UIAlertView *hud;
 @property (nonatomic, strong) PSSpecifier *slider;
@@ -218,34 +215,43 @@
 		self.slider = [self specifierForID:@"BubbleSizeSlider"];
 		self.sizeList = [self specifierForID:@"BubbleSizeList"];
 		
-		// set the slider range based on the device type
+		// set the slider range and default value
 		[self.slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"min"]] forKey:@"min"];
 		[self.slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"max"]] forKey:@"max"];
 		[self.slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"default"]] forKey:@"default"];
 		
-		// hide slider if custom size isn't chosen
-		NSString *bubbleSize = [self readPreferenceValue:self.sizeList];
-		DebugLog(@"prefs[BubbleSize] = %@", bubbleSize);
-		
-		if ([bubbleSize isEqualToString:@"custom"]) {
-			DebugLog(@"enabling slider...");
-			[self.slider setProperty:@YES forKey:@"enabled"];
-		} else {
-			DebugLog(@"disabling slider...");
-			[self.slider setProperty:@NO forKey:@"enabled"];
-		}
+		[[self.slider propertyForKey:@"control"] setEnabled:NO];
 	}
 	
 	return _specifiers;
 }
 
-//- (void)viewDidAppear:(BOOL)animated {
+
+
+
+//- (void)viewWillAppear:(BOOL)animated {
 //	DebugLog0;
-//	
-//	[self hideSliderIfNecessary];
-//	
-//	[super viewDidAppear:animated];
-//}
+//	[super viewWillAppear:animated];
+- (void)viewDidLayoutSubviews {
+	DebugLog0;
+	[super viewDidLayoutSubviews];
+	
+	// set the enabled state of slider
+	NSString *bubbleSize = [self readPreferenceValue:self.sizeList];
+	DebugLog(@"prefs[BubbleSize]: %@", bubbleSize);
+	[self showSlider:([bubbleSize isEqualToString:@"custom"])];
+	
+	// sync the preview size to the slider value
+	MGBBPreviewCell *previewCell = [[self specifierForID:@"SizeGroupCell"] propertyForKey:@"footerView"];
+	float size = [[self readPreferenceValue:self.slider] floatValue];
+	DebugLog(@"adjusting preview to: %f...", size);
+	[previewCell scaleBubble:size];
+}
+
+
+
+
+
 
 - (void)setTitle:(id)title {
 	[super setTitle:title];
@@ -257,7 +263,7 @@
 	}
 }
 
-#pragma mark - Helpers
+//
 
 - (float)sizeForSize:(NSString *)size {
 	float result = 0;
@@ -285,7 +291,16 @@
 	[previewCell scaleBubble:slider.value];
 }
 
-#pragma mark - Event Handlers
+- (void)showSlider:(BOOL)shouldShow {
+	DebugLog0;
+	
+	DebugLog(@"prefs[BubbleSize]: %@", [self readPreferenceValue:self.sizeList]);
+	
+	UISlider *control = [self.slider propertyForKey:@"control"];
+	DebugLog(@"control: %@", control);
+	
+	control.enabled = shouldShow;
+}
 
 - (void)setEnabledSwitch:(id)value specifier:(PSSpecifier *)specifier {
 	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
@@ -320,46 +335,39 @@
 }
 */
 
-
-
 - (void)setSizeListValue:(id)value specifier:(PSSpecifier *)specifier {
 	DebugLog(@"set value:%@ for key:%@ for specifier named:%@", value, [specifier propertyForKey:@"key"], specifier.name);
 	
 	[self setPreferenceValue:value specifier:specifier];
 	
 	if ([value isEqualToString:@"custom"]) {
-		DebugLog(@"enabling slider...");
-		
-		[self.slider setProperty:@YES forKey:@"enabled"];
-		
+		// chose Custom, show slider
+		[self showSlider:YES];
 	} else {
-		// chose Big or Bigger, disable the slider and set it's value...
+		// chose Big or Bigger...
 		
+		// set slider value manually
 		NSNumber *sliderValue = [NSNumber numberWithFloat:[self sizeForSize:value]];
 		DebugLog(@"setting slider value to: %@", sliderValue);
 		[self setSliderValue:sliderValue specifier:self.slider];
 		
-		DebugLog(@"disabling slider...");
-		[self.slider setProperty:@NO forKey:@"enabled"];
+		// hide slider
+		[self showSlider:NO];
 	}
 	
 	[[NSUserDefaults standardUserDefaults] synchronize];
 	
-//	[self reloadSpecifier:self.slider animated:YES];
 	[self reloadSpecifiers];
 }
 
 - (void)setSliderValue:(id)value specifier:(PSSpecifier *)specifier {
-	// round the float value to a whole number
-	int size = [value integerValue];
+	DebugLog0;
 	
-	DebugLog(@"setting pref '%@' to: %d", [specifier propertyForKey:@"key"], size);
-	[self setPreferenceValue:[NSNumber numberWithInteger:size] specifier:specifier];
+	DebugLog(@"setting pref '%@' to: %f", [specifier propertyForKey:@"key"], [value floatValue]);
+	[self setPreferenceValue:value specifier:specifier];
 	
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
-
-#pragma mark - Actions
 
 - (void)applyChanges {
 	DebugLog(@"Applying Setings...");
@@ -436,5 +444,4 @@
 }
 
 @end
-
 

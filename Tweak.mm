@@ -27,7 +27,7 @@ static const float kDefaultWidthPad = 420;
 static BOOL is_iOS7;
 static BOOL is_iPad;
 static BOOL is_Enabled;
-static int bubbleWidth;
+static float bubbleWidth;
 
 
 
@@ -59,7 +59,7 @@ static inline void loadSettings() {
 		
 		if (userSettings[@"BubbleWidth"]) {
 			bubbleWidth = [userSettings[@"BubbleWidth"] integerValue];
-			DebugLogC(@"found setting for BubbleWidth: %d", bubbleWidth);
+			DebugLogC(@"found setting for BubbleWidth: %f", bubbleWidth);
 		}
 		
 		/*

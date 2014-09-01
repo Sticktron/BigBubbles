@@ -21,4 +21,3 @@ after-stage::
 
 after-install::
 	install.exec "killall -9 MobileSMS; killall -9 Preferences"
-#install.exec "killall -HUP SpringBoard"
