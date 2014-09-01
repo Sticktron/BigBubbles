@@ -250,14 +250,14 @@
 			<string>icons/github.png</string>
 		</dict>
 		
-		<!-- r/jailbreak -->
+		<!-- /r/jailbreak -->
 		<dict>
 			<key>action</key>
 			<string>openReddit</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>Visit r/jailbreak</string>
+			<string>Visit /r/jailbreak</string>
 			<key>icon</key>
 			<string>icons/reddit.png</string>
 		</dict>
