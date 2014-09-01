@@ -1,0 +1,4 @@
+#! /bin/sh
+echo "## Deleting old prefs..."
+rm -f /private/var/mobile/Library/Preferences/com.sticktron.bigbubbles.plist
+echo "## Done"
