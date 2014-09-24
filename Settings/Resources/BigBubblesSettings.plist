@@ -4,9 +4,9 @@
 <dict>
 	<key>title</key>
 	<string>BigBubbles</string>
+	
 	<key>items</key>
 	<array>
-		
 		
 		
 		<!-- Stripe Group ----------------------------------------------------->
@@ -20,19 +20,25 @@
 		
 		
 		
+		<!-- Enabled Group ---------------------------------------------------->
 		
-		<!-- Enabled Switch Group --------------------------------------------->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			
 			<key>label</key>
 			<string></string>
+			
+			<key>footerText</key>
+			<string></string>
 		</dict>
+		
 		
 		<!-- Enabled Switch -->
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
+			
 			<key>label</key>
 			<string>Enabled</string>
 			
@@ -53,67 +59,31 @@
 		
 		
 		
-		
 		<!-- Appearance Group ------------------------------------------------->
+		
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			
 			<key>label</key>
-			<string>Bubble Style</string>
-			<key>id</key>
-			<string>SizeGroupCell</string>
+			<string>Customize</string>
+			
 			<key>footerCellClass</key>
 			<string>MGBBPreviewCell</string>
-		</dict>
-		
-		<!-- Disable Tails
-		<dict>
-			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>label</key>
-			<string>No Tails</string>
 			
 			<key>id</key>
-			<string>NoTails</string>
-			<key>set</key>
-			<string>setNoTailsSwitch:specifier:</string>
-			
-			<key>key</key>
-			<string>NoTails</string>
-			<key>default</key>
-			<false/>
-			<key>defaults</key>
-			<string>com.sticktron.bigbubbles</string>
+			<string>SizeGroupCell</string>
 		</dict>
-		-->
 		
-		<!-- Bubble Shape
-		<dict>
-			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>label</key>
-			<string>No Rounded Corners</string>
-			
-			<key>id</key>
-			<string>SquareBubbles</string>
-			<key>set</key>
-			<string>setSquareBubblesSwitch:specifier:</string>
-			
-			<key>key</key>
-			<string>SquareBubbles</string>
-			<key>default</key>
-			<false/>
-			<key>defaults</key>
-			<string>com.sticktron.bigbubbles</string>
-		</dict>
-		 -->
 		
 		<!-- Size List -->
 		<dict>
 			<key>cell</key>
 			<string>PSLinkListCell</string>
+			
 			<key>label</key>
 			<string>Size</string>
+			
 			<key>detail</key>
 			<string>PSListItemsController</string>
 			
@@ -140,30 +110,32 @@
 			<string>BubbleSize</string>
 			<key>default</key>
 			<string>bigger</string>
-			
 			<key>defaults</key>
 			<string>com.sticktron.bigbubbles</string>
 		</dict>
+		
 		
 		<!-- Custom Size Slider -->
 		<dict>
 			<key>cell</key>
 			<string>PSSliderCell</string>
+			
 			<key>cellClass</key>
 			<string>MGBBSliderCell</string>
+			
 			<key>label</key>
 			<string></string>
 			
 			<key>id</key>
 			<string>BubbleSizeSlider</string>
+			
 			<key>set</key>
 			<string>setSliderValue:specifier:</string>
 			
 			<key>min</key>
 			<real>0</real>
 			<key>max</key>
-			<real>100</real>
-			
+			<real>1</real>
 			<key>showValue</key>
 			<false/>
 			
@@ -175,17 +147,20 @@
 			<key>key</key>
 			<string>BubbleWidth</string>
 			<key>default</key>
-			<real>50</real>
+			<real>232</real>
 			<key>defaults</key>
 			<string>com.sticktron.bigbubbles</string>
 		</dict>
+		
 		
 		<!-- Apply Changes Button -->
 		<dict>
 			<key>cell</key>
 			<string>PSButtonCell</string>
+			
 			<key>label</key>
 			<string>Apply Changes</string>
+			
 			<key>action</key>
 			<string>applyChanges</string>
 		</dict>
@@ -193,26 +168,32 @@
 		
 		
 		
+		<!-- Support Group ---------------------------------------------------->
 		
-		<!-- Support Links ------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			
 			<key>label</key>
 			<string>Support</string>
 		</dict>
 		
+		
 		<!-- Email -->
 		<dict>
-			<key>action</key>
-			<string>openEmail</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
+			
 			<key>label</key>
-			<string>Email</string>
+			<string>sticktron@hotmail.com</string>
+			
+			<key>action</key>
+			<string>openEmail</string>
+			
 			<key>icon</key>
 			<string>icons/email.png</string>
 		</dict>
+		
 		
 		<!-- Tweet -->
 		<dict>
@@ -221,34 +202,22 @@
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>Twitter</string>
+			<string>@sticktron</string>
 			<key>icon</key>
 			<string>icons/twitter.png</string>
 		</dict>
 		
 		
+		<!-- Links Group ------------------------------------------------------>
 		
-		
-		
-		<!-- Other Links ------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			
 			<key>label</key>
 			<string>Links</string>
 		</dict>
 		
-		<!-- View Source -->
-		<dict>
-			<key>action</key>
-			<string>openGitHub</string>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>View Source</string>
-			<key>icon</key>
-			<string>icons/github.png</string>
-		</dict>
 		
 		<!-- /r/jailbreak -->
 		<dict>
@@ -257,24 +226,26 @@
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>Visit /r/jailbreak</string>
+			<string>/r/jailbreak</string>
 			<key>icon</key>
 			<string>icons/reddit.png</string>
 		</dict>
 		
-		<!-- sticktron.com -->
+		
+		<!-- Source Code -->
 		<dict>
 			<key>action</key>
-			<string>openWebsite</string>
+			<string>openGitHub</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>sticktron.com</string>
+			<string>Source Code</string>
 			<key>icon</key>
-			<string>icons/www.png</string>
+			<string>icons/github.png</string>
 		</dict>
 		
-		<!-- paypal -->
+		
+		<!-- Donate -->
 		<dict>
 			<key>cell</key>
 			<string>PSButtonCell</string>
@@ -288,34 +259,16 @@
 		
 		
 		
+		<!-- Credits ---------------------------------------------------------->
 		
-		
-		<!-- Idea Credit ------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>For Raymi</string>
-		</dict>
-		
-		
-		
-		
-		
-		<!-- More Credits ------------------------------------------>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>label</key>
-			<string>Made by Sticktron</string>
+			<string></string>
 			<key>footerText</key>
-			<string>©2014
-				
-😈</string>
+			<string>Sticktron VS Raymi 2014 😈</string>
 		</dict>
-		
-		
-		
 		
 		
 	</array>

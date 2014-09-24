@@ -12,7 +12,7 @@
 #import <UIKit/UIKit.h>
 #import <ChatKit/CKUIBehavior.h>
 
-#define DEBUG_PREFIX @"BigBubbles[debug]"
+#define DEBUG_PREFIX @"💬 BigBubbles"
 #import "DebugLog.h"
 
 
@@ -126,7 +126,7 @@ static inline void loadSettings() {
 		} else {
 			NSLog(@" BigBubbles is enabled.");
 			
-			// load hooks
+			// load hooks !
 			if (is_iOS7) {
 				%init(iOS7);
 			} else {
