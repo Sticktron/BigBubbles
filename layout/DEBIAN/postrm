@@ -1,4 +1,4 @@
 #! /bin/sh
-echo "## Emptying SMS thumbnail cache..."
-find /private/var/mobile/Library/SMS/Attachments/ -name *preview* -exec rm {} \;
-echo "## Done"
+echo "## [BigBubbles] Deleting SMS thumbnail cache..."
+find /private/var/mobile/Library/SMS/Attachments/ -name '*preview*' -exec rm {} \;
+echo "## [BigBubbles] Done."

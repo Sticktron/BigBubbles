@@ -1,4 +1,4 @@
 #! /bin/sh
-echo "## Deleting old prefs..."
-rm -f /private/var/mobile/Library/Preferences/com.sticktron.bigbubbles.plist
-echo "## Done"
+echo "## [BigBubbles] Deleting old prefs..."
+find /private/var/mobile/Library/Preferences/ -name 'com.sticktron.bigbubbles.plist' -exec rm {} \;
+echo "## [BigBubbles] Done."
