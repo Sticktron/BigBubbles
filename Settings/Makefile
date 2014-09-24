@@ -1,6 +1,5 @@
-ARCHS = armv7 armv7s arm64
+ARCHS = armv7 arm64
 TARGET = iphone:clang:latest:6.0
-THEOS_BUILD_DIR = Packages
 
 BUNDLE_NAME = BigBubblesSettings
 BigBubblesSettings_CFLAGS = -fobjc-arc
