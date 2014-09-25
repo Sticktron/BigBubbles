@@ -66,7 +66,7 @@
 			<string>PSGroupCell</string>
 			
 			<key>label</key>
-			<string>Customize</string>
+			<string>Choose a size</string>
 			
 			<key>footerCellClass</key>
 			<string>MGBBPreviewCell</string>
@@ -109,7 +109,7 @@
 			<key>key</key>
 			<string>BubbleSize</string>
 			<key>default</key>
-			<string>bigger</string>
+			<string>custom</string>
 			<key>defaults</key>
 			<string>com.sticktron.bigbubbles</string>
 		</dict>
@@ -129,13 +129,11 @@
 			<key>id</key>
 			<string>BubbleSizeSlider</string>
 			
-			<key>set</key>
-			<string>setSliderValue:specifier:</string>
-			
 			<key>min</key>
 			<real>0</real>
 			<key>max</key>
 			<real>1</real>
+			
 			<key>showValue</key>
 			<false/>
 			

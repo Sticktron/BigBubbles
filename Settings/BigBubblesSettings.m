@@ -23,38 +23,6 @@
 	#define VERSION_STRING		@"BigBubbles  •  1.0.6"
 #endif
 
-
-
-//
-// Interfaces
-//
-
-@interface MGBBStripeCell : PSTableCell
-@end
-
-
-@interface MGBBPreviewCell : PSTableCell
-@property (nonatomic, strong) UIImageView *previewBubble;
-- (void)scaleBubble:(float)value;
-- (void)syncBubbleSize;
-@end
-
-
-@interface MGBBSliderCell : PSSliderTableCell
-@end
-
-
-@interface BigBubblesSettingsController : PSListController
-@property (nonatomic, strong) UIAlertView *hud;
-@end
-
-
-
-
-//
-// Globals
-//
-
 #define YES_OR_NO				@"YES":@"NO"
 #define is_iPad					(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
@@ -91,9 +59,41 @@
 #define ORIGIN_PREVIEW_X		116.0
 #define ORIGIN_PREVIEW_Y		209.0
 
-#define SIZE_SPECIFIER			[self specifierForID:@"BubbleSizeList"]
-#define SLIDER_SPECIFIER		[self specifierForID:@"BubbleSizeSlider"]
-#define PREVIEW_CELL			[[self specifierForID:@"SizeGroupCell"] propertyForKey:@"footerView"]
+@class MGBBPreviewCell;
+
+
+
+// Interfaces ------------------------------------------------------------------
+
+@interface BigBubblesSettingsController : PSListController
+@property (nonatomic, strong) UIAlertView *hud;
+@property (nonatomic, strong) PSSpecifier *sizeListSpec;
+@property (nonatomic, strong) PSSpecifier *sliderSpec;
+@property (nonatomic, strong) MGBBPreviewCell *previewCell;
+@end
+
+//------------------------------------------------------------------------------
+
+@interface MGBBStripeCell : PSTableCell
+@end
+
+//------------------------------------------------------------------------------
+
+@interface MGBBSliderCell : PSSliderTableCell
+- (void)disableSliderIfNecessary;
+@end
+
+//------------------------------------------------------------------------------
+
+@interface MGBBPreviewCell : PSTableCell
+@property (nonatomic, strong) UIImageView *previewBubble;
+- (void)scaleBubble:(float)value;
+- (void)syncBubbleSize;
+@end
+
+
+
+
 
 static BigBubblesSettingsController *bbcontroller;
 static UIImage *titleIcon;
@@ -102,27 +102,18 @@ static UIImage *previewPhoneImage;
 
 
 
-//
-// Settings Controller
-//
-@implementation BigBubblesSettingsController
 
+
+// Settings Controller ---------------------------------------------------------
+
+@implementation BigBubblesSettingsController
 - (instancetype)initForContentSize:(CGSize)size {
 	self = [super initForContentSize:size];
 	if (self) {
 		bbcontroller = self;
 		
-		
-		// add a heart button to the navbar
-		UIBarButtonItem *heartButton = [[UIBarButtonItem alloc]
-										   initWithTitle:@"Love"
-										   style:UIBarButtonItemStyleDone
-										   target:self
-										   action:@selector(love)];
-		
-		heartButton.tintColor = PINK;
-		[self.navigationItem setRightBarButtonItem:heartButton];
-		
+		self.sizeListSpec = [self specifierForID:@"BubbleSizeList"];
+		self.sliderSpec = [self specifierForID:@"BubbleSizeSlider"];
 		
 		// create the loading alert
 		_hud = [[UIAlertView alloc] initWithTitle:@"Applyling Changes..."
@@ -130,17 +121,9 @@ static UIImage *previewPhoneImage;
 										 delegate:nil
 								cancelButtonTitle:nil
 								otherButtonTitles:nil];
-		
-		
-		// configure the slider based on current device size ...
-		PSSpecifier *slider = SLIDER_SPECIFIER;
-		[slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"min"]] forKey:@"min"];
-		[slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"max"]] forKey:@"max"];
-		[slider setProperty:[NSNumber numberWithFloat:[self sizeForSize:@"default"]] forKey:@"default"];
 	}
 	return self;
 }
-
 - (id)specifiers {
 	if (_specifiers == nil) {
 		_specifiers = [self loadSpecifiersFromPlistName:@"BigBubblesSettings" target:self];
@@ -148,7 +131,6 @@ static UIImage *previewPhoneImage;
 	}
 	return _specifiers;
 }
-
 - (void)setTitle:(id)title {
 	if (!titleIcon) {
 		titleIcon = [[UIImage alloc] initWithContentsOfFile:SETTINGS_ICON_PATH];
@@ -158,7 +140,47 @@ static UIImage *previewPhoneImage;
 	}
 	self.navigationItem.titleView = [[UIImageView alloc] initWithImage:titleIcon];
 }
-
+- (void)viewDidLoad {
+	// add a heart button to the navbar
+	UIBarButtonItem *heartButton = [[UIBarButtonItem alloc]
+									initWithTitle:@"Love"
+									style:UIBarButtonItemStyleDone
+									target:self
+									action:@selector(showLove)];
+	
+	heartButton.tintColor = PINK;
+	[self.navigationItem setRightBarButtonItem:heartButton];
+}
+//
+- (void)setEnabledSwitch:(id)value specifier:(PSSpecifier *)specifier {
+	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
+	
+	[self setPreferenceValue:value specifier:specifier];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	
+	[self applyChanges];
+}
+- (void)setSizeListValue:(id)value specifier:(PSSpecifier *)specifier {
+	DebugLog0;
+	
+	[self setPreferenceValue:value specifier:specifier];
+	
+	// if Big or Bigger was chosen adjust the slider value programmatically
+	if (![value isEqualToString:@"custom"]) {
+		NSNumber *sliderValue = [NSNumber numberWithFloat:[self sizeForSize:value]];
+		DebugLog(@"moving slider to: %@", sliderValue);
+		
+		[self setPreferenceValue:sliderValue specifier:self.sliderSpec];
+	}
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	
+	[bbcontroller reloadSpecifiers];
+}
+- (void)sliderMoved:(UISlider *)slider {
+	DebugLog(@"new value (%f) for preview cell (%@)", slider.value, self.previewCell);
+	[self.previewCell scaleBubble:slider.value];
+}
+//
 - (float)sizeForSize:(NSString *)size {
 	float result = 0;
 	
@@ -178,42 +200,6 @@ static UIImage *previewPhoneImage;
 	DebugLog(@"returning: %f for size (%@)", result, size);
 	return result;
 }
-
-- (void)setEnabledSwitch:(id)value specifier:(PSSpecifier *)specifier {
-	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
-	
-	[self setPreferenceValue:value specifier:specifier];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-	
-	[self applyChanges];
-}
-
-- (void)setSizeListValue:(id)value specifier:(PSSpecifier *)specifier {
-	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
-	
-	// if Big or Bigger was chosen adjust the slider value programmatically
-	if (![value isEqualToString:@"custom"]) {
-		NSNumber *sliderValue = [NSNumber numberWithFloat:[self sizeForSize:value]];
-		DebugLog(@"moving slider to: %@", sliderValue);
-		[self setSliderValue:sliderValue specifier:SLIDER_SPECIFIER];
-	}
-	
-	[self setPreferenceValue:value specifier:specifier];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-	
-	[self reloadSpecifiers];
-}
-- (void)setSliderValue:(id)value specifier:(PSSpecifier *)specifier {
-	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
-	
-	[self setPreferenceValue:value specifier:specifier];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-}
-- (void)sliderMoved:(UISlider *)slider {
-	DebugLog(@"new value: %f", slider.value);
-	[PREVIEW_CELL scaleBubble:slider.value];
-}
-
 - (void)applyChanges {
 	DebugLog(@"Applying Setings...");
 	
@@ -258,7 +244,7 @@ static UIImage *previewPhoneImage;
 	// dismiss alert
 	[self.hud dismissWithClickedButtonIndex:0 animated:YES];
 }
-
+//
 - (void)openEmail {
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:URL_EMAIL]];
 }
@@ -301,13 +287,12 @@ static UIImage *previewPhoneImage;
 
 
 
-//
-// Stripe Cell
-//
+// Stripe Cell -----------------------------------------------------------------
+
 @implementation MGBBStripeCell
 - (id)initWithSpecifier:(id)specifier {
-	static NSString *reuseIdentifier = @"myMGBBStripeCell";
-	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier specifier:specifier];
+	static NSString *cellID = @"myMGBBStripeCell";
+	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID specifier:specifier];
 	
 	if (self) {
 		DebugLog0;
@@ -339,54 +324,47 @@ static UIImage *previewPhoneImage;
 
 
 
-//
-// Preview Cell
-//
+// Preview Cell ----------------------------------------------------------------
+
 @implementation MGBBPreviewCell
 - (id)initWithSpecifier:(id)specifier {
-	static NSString *reuseIdentifier = @"myMGBBPreviewCell";
-	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier specifier:specifier];
 	
+	static NSString *cellID = @"myMGBBPreviewCell";
+	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID specifier:specifier];
 	if (self) {
-		DebugLog0;
-		
 		self.backgroundColor = UIColor.clearColor;
 		
-		// make preview bg imageview ...
-	
+		// make preview bg imageview...
+		
 		if (!previewPhoneImage) {
 			previewPhoneImage = [[UIImage alloc] initWithContentsOfFile:PHONE_IMAGE_PATH];
-			if (!previewPhoneImage) {
-				DebugLog(@"phone image missing");
-			}
 		}
-		UIImageView *phoneImageView = [[UIImageView alloc] initWithImage:previewPhoneImage];
 		
-		CGRect frame = phoneImageView.frame;
-		frame.origin.x = (self.bounds.size.width - phoneImageView.frame.size.width) / 2.0;
-		frame.origin.y = 30.0;
-		phoneImageView.frame = frame;
+		UIImageView *phoneImageView = [[UIImageView alloc] initWithImage:previewPhoneImage];
+		CGRect aframe = phoneImageView.frame;
+		aframe.origin.x = (self.bounds.size.width - phoneImageView.frame.size.width) / 2.0;
+		aframe.origin.y = 30.0;
+		phoneImageView.frame = aframe;
 		
 		
 		// make preview bubble imageview ...
 		
 		if (!previewBubbleImage) {
 			previewBubbleImage = [[UIImage alloc] initWithContentsOfFile:BUBBLE_IMAGE_PATH];
-			if (!previewBubbleImage) {
-				DebugLog(@"bubble image missing");
-			}
 		}
-		_previewBubble = [[UIImageView alloc] initWithImage:previewBubbleImage];
 		
-		frame = _previewBubble.frame;
-		frame.origin.x = ORIGIN_PREVIEW_X - frame.size.width;
-		frame.origin.y = ORIGIN_PREVIEW_Y - frame.size.height;
-		_previewBubble.frame = frame;
+		_previewBubble = [[UIImageView alloc] initWithImage:previewBubbleImage];
+		aframe = _previewBubble.frame;
+		aframe.origin.x = ORIGIN_PREVIEW_X - aframe.size.width;
+		aframe.origin.y = ORIGIN_PREVIEW_Y - aframe.size.height;
+		_previewBubble.frame = aframe;
 		
 		[phoneImageView addSubview:_previewBubble];
 		[self addSubview:phoneImageView];
 		
-		[self syncBubbleSize];
+		bbcontroller.previewCell = self;
+		
+//		[self syncBubbleSize];
 	}
 	
 	return self;
@@ -432,27 +410,32 @@ static UIImage *previewPhoneImage;
 	}
 }
 - (void)syncBubbleSize {
-	PSSpecifier *sliderSpec = [bbcontroller specifierForID:@"BubbleSizeSlider"];
-	float size = [[bbcontroller readPreferenceValue:sliderSpec] floatValue];
-	
-	DebugLog(@"setting for slider = %f; adjusting bubble...", size);
-	[self scaleBubble:size];
+	float size = [[bbcontroller readPreferenceValue:bbcontroller.sliderSpec] floatValue];
+//	if (size > 0) {
+		DebugLog(@"setting for slider = %f; adjusting bubble...", size);
+		[self scaleBubble:size];
+//	}
 }
 @end
 
 
 
-//
-// Slider Cell
-//
+// Slider Cell -----------------------------------------------------------------
+
 @implementation MGBBSliderCell
-- (id)initWithStyle:(long long)style reuseIdentifier:(id)reuseIdentifier specifier:(id)specifier {
+- (id)initWithStyle:(long long)style reuseIdentifier:(id)reuseIdentifier specifier:(PSSpecifier *)sliderSpec {
 	DebugLog0;
 	
 	static NSString *cellID = @"myMGBBSliderCell";
-	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID specifier:specifier];
+	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID specifier:sliderSpec];
 	
 	if (self) {
+		
+		// configure the slider based on current device size ...
+		[sliderSpec setProperty:[NSNumber numberWithFloat:[bbcontroller sizeForSize:@"min"]] forKey:@"min"];
+		[sliderSpec setProperty:[NSNumber numberWithFloat:[bbcontroller sizeForSize:@"max"]] forKey:@"max"];
+		[sliderSpec setProperty:[NSNumber numberWithFloat:[bbcontroller sizeForSize:@"default"]] forKey:@"default"];
+		
 		UISlider *slider = (UISlider *)_control;
 		DebugLog(@"UISlider obj = %@", slider);
 		
@@ -468,8 +451,8 @@ static UIImage *previewPhoneImage;
 }
 - (void)disableSliderIfNecessary {
 	
-	PSSpecifier *sliderSpec = [bbcontroller specifierForID:@"BubbleSizeList"];
-	NSString *setting = [bbcontroller readPreferenceValue:sliderSpec];
+	DebugLog(@"sizeListSpec=%@", bbcontroller.sizeListSpec);
+	NSString *setting = [bbcontroller readPreferenceValue:bbcontroller.sizeListSpec];
 	DebugLog(@"setting? %@", setting);
 	
 	UISlider *slider = (UISlider *)_control;
