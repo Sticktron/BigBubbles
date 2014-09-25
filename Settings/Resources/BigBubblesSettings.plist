@@ -9,7 +9,7 @@
 	<array>
 		
 		
-		<!-- Stripe Group ----------------------------------------------------->
+<!-- Stripe Cell Group -------------------------------------------------------->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -19,9 +19,7 @@
 		
 		
 		
-		
-		<!-- Enabled Group ---------------------------------------------------->
-		
+<!-- Enabled Group ------------------------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -32,7 +30,6 @@
 			<key>footerText</key>
 			<string></string>
 		</dict>
-		
 		
 		<!-- Enabled Switch -->
 		<dict>
@@ -46,7 +43,7 @@
 			<string>Enabled</string>
 			<key>set</key>
 			<string>setEnabledSwitch:specifier:</string>
-
+			
 			<key>key</key>
 			<string>Enabled</string>
 			<key>default</key>
@@ -58,9 +55,7 @@
 		
 		
 		
-		
-		<!-- Appearance Group ------------------------------------------------->
-		
+<!-- Appearance Group --------------------------------------------------------->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -74,100 +69,95 @@
 			<key>id</key>
 			<string>SizeGroupCell</string>
 		</dict>
+
+	<!-- Size List -->
+	<dict>
+		<key>cell</key>
+		<string>PSLinkListCell</string>
 		
+		<key>label</key>
+		<string>Size</string>
 		
-		<!-- Size List -->
-		<dict>
-			<key>cell</key>
-			<string>PSLinkListCell</string>
-			
-			<key>label</key>
-			<string>Size</string>
-			
-			<key>detail</key>
-			<string>PSListItemsController</string>
-			
-			<key>id</key>
-			<string>BubbleSizeList</string>
-			<key>set</key>
-			<string>setSizeListValue:specifier:</string>
-			
-			<key>validTitles</key>
-			<array>
-				<string>Big (iOS 8 size)</string>
-				<string>Bigger</string>
-				<string>Custom</string>
-			</array>
-			
-			<key>validValues</key>
-			<array>
-				<string>big</string>
-				<string>bigger</string>
-				<string>custom</string>
-			</array>
-			
-			<key>key</key>
-			<string>BubbleSize</string>
-			<key>default</key>
+		<key>detail</key>
+		<string>PSListItemsController</string>
+		
+		<key>id</key>
+		<string>BubbleSizeList</string>
+		<key>set</key>
+		<string>setSizeListValue:specifier:</string>
+		
+		<key>validTitles</key>
+		<array>
+			<string>Big (iOS 8 size)</string>
+			<string>Bigger</string>
+			<string>Custom</string>
+		</array>
+		
+		<key>validValues</key>
+		<array>
+			<string>big</string>
+			<string>bigger</string>
 			<string>custom</string>
-			<key>defaults</key>
-			<string>com.sticktron.bigbubbles</string>
-		</dict>
+		</array>
 		
+		<key>key</key>
+		<string>BubbleSize</string>
+		<key>default</key>
+		<string>custom</string>
+		<key>defaults</key>
+		<string>com.sticktron.bigbubbles</string>
+	</dict>
+
+	<!-- Custom Size Slider -->
+	<dict>
+		<key>cell</key>
+		<string>PSSliderCell</string>
 		
-		<!-- Custom Size Slider -->
-		<dict>
-			<key>cell</key>
-			<string>PSSliderCell</string>
-			
-			<key>cellClass</key>
-			<string>MGBBSliderCell</string>
-			
-			<key>label</key>
-			<string></string>
-			
-			<key>id</key>
-			<string>BubbleSizeSlider</string>
-			
-			<key>min</key>
-			<real>0</real>
-			<key>max</key>
-			<real>1</real>
-			
-			<key>showValue</key>
-			<false/>
-			
-			<key>leftImage</key>
-			<string>icons/icon-minus.png</string>
-			<key>rightImage</key>
-			<string>icons/icon-plus.png</string>
-			
-			<key>key</key>
-			<string>BubbleWidth</string>
-			<key>default</key>
-			<real>232</real>
-			<key>defaults</key>
-			<string>com.sticktron.bigbubbles</string>
-		</dict>
+		<key>cellClass</key>
+		<string>MGBBSliderCell</string>
 		
+		<key>label</key>
+		<string></string>
 		
-		<!-- Apply Changes Button -->
-		<dict>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			
-			<key>label</key>
-			<string>Apply Changes</string>
-			
-			<key>action</key>
-			<string>applyChanges</string>
-		</dict>
+		<key>id</key>
+		<string>BubbleSizeSlider</string>
 		
+		<key>min</key>
+		<real>0</real>
+		<key>max</key>
+		<real>1</real>
 		
+		<key>showValue</key>
+		<true/>
 		
+		<key>leftImage</key>
+		<string>icons/icon-minus.png</string>
+		<key>rightImage</key>
+		<string>icons/icon-plus.png</string>
 		
-		<!-- Support Group ---------------------------------------------------->
+		<key>key</key>
+		<string>BubbleWidth</string>
+		<key>default</key>
+		<real>232</real>
+		<key>defaults</key>
+		<string>com.sticktron.bigbubbles</string>
+	</dict>
+
+	<!-- Apply Changes Button -->
+	<dict>
+		<key>cell</key>
+		<string>PSButtonCell</string>
 		
+		<key>label</key>
+		<string>Apply Changes</string>
+		
+		<key>action</key>
+		<string>applyChanges</string>
+	</dict>
+
+
+
+<!-- Support Group ------------------------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -175,7 +165,6 @@
 			<key>label</key>
 			<string>Support</string>
 		</dict>
-		
 		
 		<!-- Email -->
 		<dict>
@@ -192,7 +181,6 @@
 			<string>icons/email.png</string>
 		</dict>
 		
-		
 		<!-- Tweet -->
 		<dict>
 			<key>action</key>
@@ -206,8 +194,8 @@
 		</dict>
 		
 		
-		<!-- Links Group ------------------------------------------------------>
 		
+<!-- Links Group -------------------------------------------------------------->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -215,7 +203,6 @@
 			<key>label</key>
 			<string>Links</string>
 		</dict>
-		
 		
 		<!-- /r/jailbreak -->
 		<dict>
@@ -229,7 +216,6 @@
 			<string>icons/reddit.png</string>
 		</dict>
 		
-		
 		<!-- Source Code -->
 		<dict>
 			<key>action</key>
@@ -242,7 +228,6 @@
 			<string>icons/github.png</string>
 		</dict>
 		
-		
 		<!-- Donate -->
 		<dict>
 			<key>cell</key>
@@ -254,11 +239,10 @@
 			<key>action</key>
 			<string>openPayPal</string>
 		</dict>
-		
-		
-		
-		<!-- Credits ---------------------------------------------------------->
-		
+
+
+
+<!-- Credits ------------------------------------------------------------------>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -272,3 +256,6 @@
 	</array>
 </dict>
 </plist>
+
+
+
