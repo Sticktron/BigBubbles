@@ -19,8 +19,13 @@
 #define YES_OR_NO				@"YES":@"NO"
 #define SETTINGS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.bigbubbles.plist"]
 
-static const float kDefaultWidthPhone = 280;
-static const float kDefaultWidthPad = 420;
+#define SIZE_BIG_PHONE			232.0f //default
+#define SIZE_BIGGER_PHONE		280.0f
+
+#define SIZE_BIG_PAD			312.0f //default
+#define SIZE_BIGGER_PAD			420.0f
+
+
 static BOOL is_iOS7;
 static BOOL is_iPad;
 static BOOL is_Enabled;
@@ -117,7 +122,8 @@ static inline void loadSettings() {
 		is_Enabled = YES;
 		is_iOS7 = (kCFCoreFoundationVersionNumber >= 847.20);
 		is_iPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
-		bubbleWidth = (is_iPad) ? kDefaultWidthPad : kDefaultWidthPhone;
+		
+		bubbleWidth = (is_iPad) ? SIZE_BIG_PAD : SIZE_BIG_PHONE;
 		
 		loadSettings();
 		

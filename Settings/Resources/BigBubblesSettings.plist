@@ -101,7 +101,7 @@
 		</array>
 		
 		<key>key</key>
-		<string>BubbleSize</string>
+		<string>BubbleSizeName</string>
 		<key>default</key>
 		<string>custom</string>
 		<key>defaults</key>
@@ -117,10 +117,10 @@
 		<string>MGBBSliderCell</string>
 		
 		<key>label</key>
-		<string></string>
+		<string>Bigger</string>
 		
 		<key>id</key>
-		<string>BubbleSizeSlider</string>
+		<string>PreviewSlider</string>
 		
 		<key>min</key>
 		<real>0</real>
@@ -136,7 +136,7 @@
 		<string>icons/icon-plus.png</string>
 		
 		<key>key</key>
-		<string>BubbleWidth</string>
+		<string>PreviewSliderValue</string>
 		<key>default</key>
 		<real>232</real>
 		<key>defaults</key>

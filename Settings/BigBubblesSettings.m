@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 @interface MGBBSliderCell : PSSliderTableCell
+@property (nonatomic, strong) UISlider *slider;
 - (void)disableSliderIfNecessary;
 @end
 
@@ -75,6 +76,8 @@
 #define URL_WEBSITE				@"http://sticktron.com"
 #define URL_PAYPAL				@"https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BKGYMJNGXM424&lc=CA&item_name=Donation%20to%20Sticktron&item_number=BigBubbles&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"
 
+#define SETTINGS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.bigbubbles.plist"]
+
 #define SETTINGS_ICON_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/Icon@2x.png"
 #define PHONE_IMAGE_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-phone@2x.png"
 #define BUBBLE_IMAGE_PATH		@"/Library/PreferenceBundles/BigBubblesSettings.bundle/preview-bubble@2x.png"
@@ -108,11 +111,12 @@ static UIImage *previewBubbleImage;
 // Settings Controller ---------------------------------------------------------
 
 @implementation BigBubblesSettingsController
+
 - (instancetype)initForContentSize:(CGSize)size {
-	DebugLog0;
-	
 	self = [super initForContentSize:size];
 	if (self) {
+		DebugLog0;
+		
 		bbcontroller = self;
 		
 		_sizeDict = @{
@@ -123,12 +127,12 @@ static UIImage *previewBubbleImage;
 		};
 		DebugLog(@"sizeDict=%@", _sizeDict);
 		
-		
 		_sizeListSpec = [self specifierForID:@"BubbleSizeList"];
-		_sliderSpec = [self specifierForID:@"BubbleSizeSlider"];
-
+		
 		// configure the slider range based on current device size
+		_sliderSpec = [self specifierForID:@"PreviewSlider"];
 		DebugLog(@"config slider range (%@)", _sliderSpec);
+		
 		[_sliderSpec setProperty:_sizeDict[@"min"] forKey:@"min"];
 		[_sliderSpec setProperty:_sizeDict[@"max"] forKey:@"max"];
 		[_sliderSpec setProperty:_sizeDict[@"big"] forKey:@"default"];
@@ -143,12 +147,14 @@ static UIImage *previewBubbleImage;
 	}
 	return _specifiers;
 }
+
 - (void)setTitle:(id)title {
 	if (!titleIcon) {
 		titleIcon = [[UIImage alloc] initWithContentsOfFile:SETTINGS_ICON_PATH];
 	}
 	self.navigationItem.titleView = [[UIImageView alloc] initWithImage:titleIcon];
 }
+
 - (void)viewDidLoad {
 	// add a heart button to the navbar
 	UIBarButtonItem *heartButton = [[UIBarButtonItem alloc]
@@ -160,6 +166,15 @@ static UIImage *previewBubbleImage;
 	heartButton.tintColor = PINK;
 	[self.navigationItem setRightBarButtonItem:heartButton];
 }
+
+- (void)viewWillAppear:(BOOL)animated {
+	DebugLog0;
+	[super viewWillAppear:animated];
+	
+	[self.previewCell syncBubbleSize];
+	[self.sliderCell disableSliderIfNecessary];
+}
+
 - (void)setEnabledSwitch:(id)value specifier:(PSSpecifier *)specifier {
 	DebugLog(@"set %@=%@", [specifier propertyForKey:@"key"], value);
 	[self setPreferenceValue:value specifier:specifier];
@@ -167,33 +182,22 @@ static UIImage *previewBubbleImage;
 	
 	[self applyChanges];
 }
+
 - (void)setSizeListValue:(id)value specifier:(PSSpecifier *)specifier {
-	
-	// save Size pref
-	DebugLog(@"setting value (%@) for specifier: %@", value, specifier.name);
 	[self setPreferenceValue:value specifier:specifier];
 	
 	// manipulate the Slider based on the Size
-	if (![value isEqualToString:@"custom"]) {
-		NSNumber *sliderValue = [self sizeForSize:value];
-		DebugLog(@"moving slider to: %@", sliderValue);
+	if ([value isEqualToString:@"big"] || [value isEqualToString:@"bigger"]) {
+		NSNumber *newSliderValue = [self sizeForSize:value];
 		
-		DebugLog(@"setting value (%@) for specifier: %@", sliderValue, self.sliderSpec.name);
-		[self setPreferenceValue:sliderValue specifier:self.sliderSpec];
+		[self.sliderCell.slider setValue:floor([newSliderValue floatValue]) animated:NO];
 		
+		[self setPreferenceValue:newSliderValue specifier:self.sliderSpec];
 	}
-	
-	// update the Slider cell
-	[self.sliderCell reloadWithSpecifier:self.sliderSpec animated:NO];
-	
-	// hide Slider if necessary
-	[self.sliderCell disableSliderIfNecessary];
-	
-	// apply change
-	[self applyChanges];
 }
+
 - (void)sliderMoved:(UISlider *)slider {
-	DebugLog(@"new value (%f) for preview cell (%@)", slider.value, self.previewCell);
+	//DebugLog(@"new value (%f) for preview cell (%@)", slider.value, self.previewCell);
 	[self.previewCell scaleBubble:slider.value];
 }
 
@@ -207,6 +211,7 @@ static UIImage *previewBubbleImage;
 	
 	return result;
 }
+
 - (void)applyChanges {
 	DebugLog(@"Applying Setings...");
 	
@@ -220,6 +225,18 @@ static UIImage *previewBubbleImage;
 	}
 	[self.hud show];
 	
+	
+	// Save setting.
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:SETTINGS_PLIST_PATH];
+	DebugLog(@"loaded settings plist: %@", settings);
+	
+	settings[@"BubbleWidth"] = [self readPreferenceValue:self.sliderSpec];
+	
+	DebugLog(@"### writing new settings: %@", settings);
+	[settings writeToFile:SETTINGS_PLIST_PATH atomically:YES];
+	
+	
+	// Thumbnail Cache Removal //
 	
 	// Step 1: Quit MobileSMS
 	
@@ -239,7 +256,7 @@ static UIImage *previewBubbleImage;
 	NSError *error;
 	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"preview"
 																		   options:NSRegularExpressionCaseInsensitive
-																			 error:nil];
+																			 error:NULL];
 	
 	while (file = [filesEnumerator nextObject]) {
 		NSUInteger match = [regex numberOfMatchesInString:file options:0 range:NSMakeRange(0, [file length])];
@@ -404,19 +421,18 @@ static UIImage *previewBubbleImage;
 	float oldWidth = pframe.size.width;
 	float diff = (size - min) * (SIZE_PREVIEW_MAX - SIZE_PREVIEW_MIN);
 	float newWidth = (diff/(max - min)) + SIZE_PREVIEW_MIN;
-	pframe.size.width = newWidth;
-	pframe.size.height = (newWidth / oldWidth) * pframe.size.height;
+	pframe.size.width = floor(newWidth);
+	pframe.size.height = floor((newWidth / oldWidth) * pframe.size.height);
 	
 	// fix origin
 	pframe.origin.x = ORIGIN_PREVIEW_X - pframe.size.width;
 	pframe.origin.y = ORIGIN_PREVIEW_Y - pframe.size.height;
 	
-	//DebugLog(@"> setting frame to: %@", NSStringFromCGRect(pframe));
+	DebugLog(@"> setting frame to: %@", NSStringFromCGRect(pframe));
 	self.previewBubble.frame = pframe;
-	
-	DebugLog(@"scaled to: %f", size);
 }
 - (void)syncBubbleSize {
+	// set preview image to size in settings
 	float size = [[bbcontroller readPreferenceValue:bbcontroller.sliderSpec] floatValue];
 	if (size > 0) {
 		DebugLog(@"setting for slider = %f; adjusting bubble...", size);
@@ -433,18 +449,22 @@ static UIImage *previewBubbleImage;
 - (id)initWithStyle:(long long)style reuseIdentifier:(id)reuseIdentifier specifier:(PSSpecifier *)specifier {
 	DebugLog0;
 	
-	static NSString *cellID = @"myMGBBSliderCell";
-	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID specifier:specifier];
-	
+	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"myMGBBSliderCell" specifier:specifier];
 	if (self) {
+		
 		// colorize slider track
-		UISlider *slider = (UISlider *)_control;
-		DebugLog(@"UISlider obj = %@", slider);
-		slider.minimumTrackTintColor = PINK;
-		slider.maximumTrackTintColor = PURPLE;
+		_slider = (UISlider *)_control;
+		DebugLog(@"UISlider obj = %@", _slider);
+		
+//		_slider.minimumTrackTintColor = PINK;
+//		_slider.maximumTrackTintColor = PURPLE;
+		
+		_slider.thumbTintColor = PINK;
+		_slider.minimumTrackTintColor = PURPLE;
+		
 		
 		// UIControlEventValueChanged isn't firing continuously, so I'm using TouchDragInside instead
-		[slider addTarget:self.specifier.target action:@selector(sliderMoved:) forControlEvents:UIControlEventTouchDragInside];
+		[_slider addTarget:self.specifier.target action:@selector(sliderMoved:) forControlEvents:UIControlEventTouchDragInside];
 		
 		[self disableSliderIfNecessary];
 		
